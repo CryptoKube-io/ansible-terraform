@@ -1,0 +1,35 @@
+---
+- name: Terraform archive download
+  get_url:
+    url: '{{terraform_url}}'
+    dest: /tmp/{{terraform_archive}}
+    mode: 0600
+    checksum: '{{terraform_checksum}}'
+
+- name: Terraform directory creation
+  file:
+    path: '{{terraform_dir}}'
+    state: directory
+    owner: '{{terraform_user}}'
+    group: '{{terraform_group}}'
+
+- name: Terraform archive extraction
+  unarchive:
+    remote_src: True
+    src: /tmp/{{terraform_archive}}
+    dest: '{{terraform_dir}}'
+    owner: '{{terraform_user}}'
+    group: '{{terraform_group}}'
+    mode: 0755
+    creates: '{{terraform_dir}}/terraform'
+
+- name: Terraform archive removal
+  file:
+    path: /tmp/{{terraform_archive}}
+    state: absent
+
+- name: Terraform binary link
+  file:
+    src: '{{terraform_dir}}/terraform'
+    dest: '{{terraform_bin_dir}}/terraform'
+    state: link
